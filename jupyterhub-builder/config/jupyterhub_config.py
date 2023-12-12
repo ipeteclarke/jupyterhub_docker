@@ -17,15 +17,24 @@ print("Admin Users", admin_users)
 admin_users_set = set(filter(len, map(str.strip, admin_users.split(','))))
 print("Admin Users Set", admin_users_set)
 
-# c.JupyterHub.authenticator_class = "oauthenticator.LocalGitHubOAuthenticator"
-# c.LocalGitHubOAuthenticator.create_system_users = True
-# c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
-# c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
-# c.JupyterHub.authenticator_class = DummyAuthenticator
-c.Authenticator.admin_users = admin_users_set
-c.JupyterHub.admin_access = True
-c.LocalAuthenticator.create_system_users = True
-c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
+
+#if "" != os.environ['OAUTH_CALLBACK_URL']: 
+if os.environ.get('OAUTH_CALLBACK_URL') is not None:
+    c.JupyterHub.authenticator_class = "oauthenticator.LocalGitHubOAuthenticator"
+    c.LocalGitHubOAuthenticator.create_system_users = True
+    c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
+    c.Authenticator.admin_users = admin_users_set
+    #c.JupyterHub.admin_access = True
+else:
+    # c.JupyterHub.authenticator_class = "oauthenticator.LocalGitHubOAuthenticator"
+    # c.LocalGitHubOAuthenticator.create_system_users = True
+    # c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
+    # c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
+    # c.JupyterHub.authenticator_class = DummyAuthenticator
+    c.Authenticator.admin_users = admin_users_set
+    c.JupyterHub.admin_access = True
+    c.LocalAuthenticator.create_system_users = True
+    c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
 
 
 ## mount a data location to persist login and user data
