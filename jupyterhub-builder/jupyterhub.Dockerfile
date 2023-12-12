@@ -8,8 +8,8 @@ RUN apt-get -y install git
 # RUN pip install --upgrade setuptools
 
 WORKDIR jupyter
-COPY config/requirements.txt .
+COPY jupyterhub-builder/config/requirements.txt .
 RUN pip install -r ./requirements.txt
-COPY config/jupyterhub_config.py /srv/
+COPY jupyterhub-builder/config/jupyterhub_config.py /srv/
 
 ENTRYPOINT jupyterhub --log-level=DEBUG -f /srv/jupyterhub_config.py
