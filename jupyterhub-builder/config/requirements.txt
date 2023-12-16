@@ -3,12 +3,15 @@ oauthenticator
 jupyter
 
 # additional libraries
-#matplotlib
+matplotlib
 #numba
 numpy
 pandas
-#protobuf
+protobuf
 #scikit-image
 #scikit-learn
 #scipy
 seaborn
+
+# database libraries
+psycopg2-binary

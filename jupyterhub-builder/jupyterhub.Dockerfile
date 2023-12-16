@@ -11,5 +11,6 @@ WORKDIR jupyter
 COPY jupyterhub-builder/config/requirements.txt .
 RUN pip install -r ./requirements.txt
 COPY jupyterhub-builder/config/jupyterhub_config.py /srv/
+COPY jupyterhub-builder/src/* /tmp/src/
 
 ENTRYPOINT jupyterhub --log-level=DEBUG -f /srv/jupyterhub_config.py

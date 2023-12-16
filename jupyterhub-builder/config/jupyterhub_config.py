@@ -1,12 +1,6 @@
 import os
-
-#from jupyterhub.auth import DummyAuthenticator
-
-
-## set public interface
-#c.JupyterHub.ip = os.environ["JUPYTERHUB_IP"]
-#c.JupyterHub.port = int(os.environ["JUPYTERHUB_PORT"])
-#c.JupyterHub.hub_connect_ip = os.environ["JUPYTERHUB_IP"]
+from distutils.dir_util import copy_tree
+from pathlib import Path
 
 c.JupyterHub.ip = '0.0.0.0'
 c.JupyterHub.hub_connect_ip = 'jupyterhub'
@@ -17,20 +11,14 @@ print("Admin Users", admin_users)
 admin_users_set = set(filter(len, map(str.strip, admin_users.split(','))))
 print("Admin Users Set", admin_users_set)
 
+oauthstr = os.environ.get('OAUTH_CALLBACK_URL')
 
-#if "" != os.environ['OAUTH_CALLBACK_URL']: 
-if os.environ.get('OAUTH_CALLBACK_URL') is not None:
+if (oauthstr is not None) and (len(oauthstr)>0):
     c.JupyterHub.authenticator_class = "oauthenticator.LocalGitHubOAuthenticator"
     c.LocalGitHubOAuthenticator.create_system_users = True
     c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
     c.Authenticator.admin_users = admin_users_set
-    #c.JupyterHub.admin_access = True
 else:
-    # c.JupyterHub.authenticator_class = "oauthenticator.LocalGitHubOAuthenticator"
-    # c.LocalGitHubOAuthenticator.create_system_users = True
-    # c.LocalGitHubOAuthenticator.allowed_users = admin_users_set
-    # c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
-    # c.JupyterHub.authenticator_class = DummyAuthenticator
     c.Authenticator.admin_users = admin_users_set
     c.JupyterHub.admin_access = True
     c.LocalAuthenticator.create_system_users = True
@@ -47,3 +35,19 @@ c.JupyterHub.cookie_secret_file = os.path.join(data_dir, 'jupyterhub_cookie_secr
 #    print("Cleaning up proxy pid file")
 #    os.remove(proxy_pid_file)
 #c.ConfigurableHTTPProxy.pid_file = proxy_pid_file
+
+
+def populate_user_home(spawner):
+    username = spawner.user.name
+    # we expect to see creates users in /home
+    volume_path = os.path.join('/home', username)
+    flag_file = os.path.join(volume_path, '.iotics.notebook.flag')
+
+    # if not os.path.exists(volume_path):
+    #     os.mkdir(volume_path, 0o777)
+
+    if not os.path.isfile(flag_file):
+        copy_tree("/tmp/src", os.path.join(volume_path,'examples'))
+        Path(flag_file).touch()
+
+c.Spawner.pre_spawn_hook = populate_user_home

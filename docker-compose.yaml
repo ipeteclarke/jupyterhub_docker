@@ -1,8 +1,8 @@
 version: "3.3"
 services:
 
-  jupyterhub:
-    container_name: 'jupyterhub'
+  jupyter-jupyterhub:
+    container_name: 'jupyter-jupyterhub'
     build:
       context: .
       dockerfile: jupyterhub-builder/jupyterhub.Dockerfile
@@ -13,18 +13,16 @@ services:
       JUPYTERHUB_CONTAINER_NAME: ${JUPYTERHUB_CONTAINER_NAME}
       JUPYTERHUB_DATA: ${JUPYTERHUB_DATA}
       JUPYTERHUB_CONTAINER_DATA_DIR: ${JUPYTERHUB_CONTAINER_DATA_DIR}
-      ADMIN_USERS: 
-      OAUTH_CALLBACK_URL:
-      OAUTH_CLIENT_ID:
-      OAUTH_CLIENT_SECRET:
+      ADMIN_USERS: ${ADMIN_USERS} 
+      OAUTH_CALLBACK_URL: ${OAUTH_CALLBACK_URL}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
     volumes:
-      - ${JUPYTERHUB_DATA}:/home/jupyterhub
-      - ${JUPYTERHUB_USERS_HOME}:/home
+      - jupyterhub_data:/home/jupyterhub
+      - jupyterhub_users_home:/home
     ports:
-      #- 443:443
       - 8000:8000
       - 8081:8081
-    #network_mode: host
     restart: always
     networks: ["jupyter-connector-public"]
 
@@ -34,9 +32,9 @@ services:
     container_name: "jupyter-postgres"
     hostname: "postgres"
     environment:
-#     - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-#     - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_DB=${POSTGRES_DB}
     logging:
       options:
         max-size: 10m
@@ -57,6 +55,7 @@ services:
     image: portainer/portainer-ce:latest
     # ports:
     #   - 9443:9443
+    command: --admin-password '$$2y$$05$$ASFxrXyfALJnKE5pKh7BpulQf8829Odq7td0Ogi5NZ8pjKKMpjCwS' 
     volumes:
       - jupyter-portainer-data:/data
       - /var/run/docker.sock:/var/run/docker.sock
@@ -65,7 +64,6 @@ services:
  
 
   jupyter-swag:
-    #image: lscr.io/linuxserver/swag
     container_name: jupyter-swag
     build:
       context: "."
@@ -81,7 +79,7 @@ services:
       - URL=${SWAG_URL}
       - EMAIL=${SWAG_EMAIL}
       - DUCKDNSTOKEN=${SWAG_DUCKDNSTOKEN}    
-      - PROPAGATION=90
+      - PROPAGATION=60
     volumes:
       - jupyter-swag-config:/config
     ports:
@@ -94,9 +92,9 @@ networks:
   jupyter-connector-public:
     name: "jupyter-connector-pjc-public"
 
-volumes:
-#  jupyterhub_data:
-#  jupyterhub_users_home:
+volumes:  
+  jupyterhub_data:
+  jupyterhub_users_home:
   jupyter-portainer-data:
   jupyter-swag-config:
   jupyter-db:
